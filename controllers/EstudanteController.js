@@ -17,13 +17,3 @@ export async function updateEstudante(req, res) {
   if (!est) return res.status(404).json({ message: 'Estudante não encontrado' });
   res.json(est);
 }
-
-// POST /api/estudantes/:userId/renovacoes
-export async function solicitarRenovacao(req, res) {
-  const { userId } = req.params;
-  const est = await Estudante.findOne({ user: userId });
-  if (!est) return res.status(404).json({ message: 'Estudante não encontrado' });
-
-  const renovacao = await Renovacao.create({ estudante: est._id });
-  res.status(201).json(renovacao);
-}
