@@ -7,7 +7,7 @@ import estudanteRoutes    from './routes/estudanteRoutes.js';
 import funcionarioRoutes  from './routes/funcionarioRoutes.js';
 import localRoutes        from './routes/localRoutes.js';
 import disponibilidadeRoutes from './routes/disponibilidadeRoutes.js';
-import renovacaoRoutes from './routes/renovacaoRoutes.js'
+import carteirinhaRoutes from './routes/carteirinhaRoutes.js'
 import notificacaoRoutes from './routes/notificacoesRoutes.js'
 
 dotenv.config();
@@ -26,7 +26,7 @@ app.use('/api/estudantes', estudanteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
 app.use('/api/spaces', localRoutes);
 app.use('/api/disponibilidade', disponibilidadeRoutes);
-app.use('/api/renovacoes', renovacaoRoutes);
+app.use('api/carteirinhas', carteirinhaRoutes);
 app.use('/api/notifications', notificacaoRoutes);
 
 // Se o token for válido, o usuário poderá acessar essa rota caso contrário fica na tela de login
