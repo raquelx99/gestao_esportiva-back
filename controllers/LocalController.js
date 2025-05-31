@@ -1,4 +1,4 @@
-import { Local } from "../models/Local";
+import { Local } from "../models/Local.js";
 
 // GET /api/spaces
 export async function listarLocais(req, res) {

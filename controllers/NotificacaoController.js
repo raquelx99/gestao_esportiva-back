@@ -1,4 +1,4 @@
-import { Notificacao } from '../models/Notificacao';
+import { Notificacao } from '../models/Notificacao.js';
 
 // GET /api/notifications/:userId
 export async function listarNotificacao(req, res) {

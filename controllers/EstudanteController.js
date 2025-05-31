@@ -1,5 +1,4 @@
-import { Estudante } from '../models/estudante.model.js';
-import { Renovacao }   from '../models/renovacao.model.js';
+import { Estudante } from '../models/Estudante.js';
 
 // GET /api/estudantes/:userId
 export async function getEstudante(req, res) {

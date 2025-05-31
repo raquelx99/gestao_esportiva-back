@@ -1,4 +1,4 @@
-import { Disponibilidade } from "../models/Disponibilidade";
+import { Disponibilidade } from "../models/Disponibilidade.js";
 
 // GET /api/availability/:spaceId/:day
 export async function getDisponibilidade(req, res) {

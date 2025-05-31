@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { Carteirinha } from '../models/Carteirinha';
-import { Estudante }  from '../models/Estudante';
+import { Carteirinha } from '../models/Carteirinha.js';
+import { Estudante }  from '../models/Estudante.js';
 
 // POST /api/carteirinha
 export async function criarCarteirinha(req, res, next) {

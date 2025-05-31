@@ -1,11 +1,10 @@
 import { Router }                from 'express';
 import * as estudanteCtrl        from '../controllers/EstudanteController.js';
-import { autenticarToken }        from '../middleware/autenticarToken';
 
 const router = Router();
 
 router
-  .get('/:userId', autenticarToken('estudante'), estudanteCtrl.getEstudante)
-  .put('/:userId', autenticarToken('estudante'), estudanteCtrl.updateEstudante)
+  .get('/:userId', estudanteCtrl.getEstudante)
+  .put('/:userId', estudanteCtrl.updateEstudante)
 
 export default router;

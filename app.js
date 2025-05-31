@@ -2,7 +2,9 @@ import mongoose from 'mongoose';
 import express from 'express';
 import dotenv from 'dotenv';
 
+import autenticarToken from './middlewares/autenticarToken.js'
 import autenticacaoRoutes from './routes/autenticacaoRoutes.js';
+import usuarioRoutes from './routes/usuarioRoutes.js'
 import estudanteRoutes    from './routes/estudanteRoutes.js';
 import funcionarioRoutes  from './routes/funcionarioRoutes.js';
 import localRoutes        from './routes/localRoutes.js';
@@ -22,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Rotas
 app.use('/api/auth', autenticacaoRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/estudantes', estudanteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
 app.use('/api/spaces', localRoutes);
