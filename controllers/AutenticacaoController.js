@@ -1,16 +1,24 @@
 import { isPasswordValid } from "../utils/hash.js";
 import { Usuario } from "../models/Usuario.js";
+import { Estudante }        from "../models/Estudante.js";
+import { Funcionario }      from "../models/Funcionario.js";
 import { gerarToken } from "../utils/jwt.js";
 
 export const login = async (req, res) => {
 
-    const { email, senha } = req.body;
+    const { matricula, senha } = req.body;
 
     try {
-        const usuario = await Usuario.findOne({ email });
-        if (!usuario) {
-            return res.status(401).json({ erro: "Email inválido." });
+
+        const estudante = await Estudante.findOne({ matricula }).populate('user');
+        const funcionario = await Funcionario.findOne({ matricula }).populate('user');
+
+        const usuarioRelacionado = estudante || funcionario;
+        if (!usuarioRelacionado) {
+        return res.status(404).json({ mensagem: 'Usuário não encontrado' });
         }
+
+        const usuario = usuarioRelacionado.user;
 
         const senhaValida = await isPasswordValid(senha, usuario.senha);
 
@@ -25,7 +33,7 @@ export const login = async (req, res) => {
             usuario: {
                 id: usuario._id,
                 nome: usuario.nome,
-                email: usuario.email
+                role: usuario.role
             }
         });
 

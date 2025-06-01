@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import express from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 import autenticarToken from './middlewares/autenticarToken.js'
 import autenticacaoRoutes from './routes/autenticacaoRoutes.js';
@@ -15,6 +16,7 @@ import notificacaoRoutes from './routes/notificacoesRoutes.js'
 dotenv.config();
 
 const app = express();
+app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(express.json());
 
 // Conexão com o MongoDB
@@ -27,7 +29,7 @@ app.use('/api/auth', autenticacaoRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/estudantes', estudanteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
-app.use('/api/spaces', localRoutes);
+app.use('/api/locais', localRoutes);
 app.use('/api/disponibilidade', disponibilidadeRoutes);
 app.use('api/carteirinhas', carteirinhaRoutes);
 app.use('/api/notifications', notificacaoRoutes);

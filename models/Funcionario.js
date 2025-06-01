@@ -7,6 +7,7 @@ const funcionarioSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  matricula: { type: String, required: true, unique: true },
   cargo: { type: String, required: true }
 })
 
