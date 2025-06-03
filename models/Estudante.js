@@ -13,7 +13,7 @@ const estudanteSchema = new mongoose.Schema({
   centro:           { type: String, required: true },
   telefone:         { type: String, required: true },
   telefoneUrgencia: { type: String, required: true },
-  semestreInicio:   { type: Date,   required: true }
+  semestreInicio:   { type: Date, default: null}
 });
 
 export const Estudante = mongoose.model('Estudante', estudanteSchema);

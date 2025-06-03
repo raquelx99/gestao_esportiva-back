@@ -28,47 +28,35 @@ export const criarUsuario = async (req, res) => {
         curso,
         centro,
         telefone,
-        telefoneUrgencia,
-        semestreInicio
+        telefoneUrgencia
       } = req.body;
 
-      if (
-        !matricula ||
-        !curso ||
-        !centro ||
-        !telefone ||
-        !telefoneUrgencia ||
-        !semestreInicio
-      ) {
+      if (!matricula || !curso || !centro || !telefone || !telefoneUrgencia) {
         await Usuario.findByIdAndDelete(novoUsuario._id);
         return res.status(400).json({
           erro:
-            'Para role "estudante", é necessário enviar: matricula, curso, centro, telefone, ' +
-            'telefoneUrgencia e semestreInicio.'
+            'Para role "estudante", é necessário enviar: matricula, curso, centro, telefone e telefoneUrgencia.'
         });
       }
 
       const novoEstudante = new Estudante({
         user: novoUsuario._id,
         matricula,
-        nome, 
+        nome,     
         curso,
         centro,
         telefone,
         telefoneUrgencia,
-        semestreInicio: new Date(semestreInicio)
       });
       await novoEstudante.save();
       perfilCriado = { tipo: 'estudante', dados: novoEstudante };
 
     } else if (role === 'funcionario') {
       const { matricula, cargo } = req.body;
-
       if (!matricula || !cargo) {
         await Usuario.findByIdAndDelete(novoUsuario._id);
         return res.status(400).json({
-          erro:
-            'Para role "funcionario", é necessário enviar: matricula e cargo.'
+          erro: 'Para role "funcionario", é necessário enviar: matricula e cargo.'
         });
       }
 
@@ -86,15 +74,18 @@ export const criarUsuario = async (req, res) => {
       perfil: perfilCriado
     });
   } catch (err) {
-  if (err.code === 11000) {
-    console.log('*** ERRO 11000 ***', err.keyValue);
-    return res
-      .status(409)
-      .json({ erro: 'Já existe um usuário ou matrícula cadastrada com esses dados.', detalhe: err.keyValue });
+    if (err.code === 11000) {
+      console.log('*** ERRO 11000 ***', err.keyValue);
+      return res
+        .status(409)
+        .json({
+          erro: 'Já existe um usuário ou matrícula cadastrada com esses dados.',
+          detalhe: err.keyValue
+        });
+    }
+    return res.status(500).json({ erro: err.message });
   }
-  return res.status(500).json({ erro: err.message });
-}
-}
+};
 
 export const deletarUsuario = async (req, res) => {
   try {

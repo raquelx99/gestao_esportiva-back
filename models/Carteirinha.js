@@ -29,10 +29,7 @@ const carteirinhaSchema = new mongoose.Schema({
     default: 'pendente',
     required: true
   },
-  historicoRenovacoes: [{
-    dataRenovacao: Date,
-    periodoEmMeses: Number
-  }]
+  liberadoPosValidacao: { type: Boolean, default: false }
 }, { timestamps: true });
 
 export const Carteirinha = mongoose.model('Carteirinha', carteirinhaSchema);

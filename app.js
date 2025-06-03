@@ -31,7 +31,7 @@ app.use('/api/estudantes', estudanteRoutes);
 app.use('/api/funcionarios', funcionarioRoutes);
 app.use('/api/locais', localRoutes);
 app.use('/api/disponibilidade', disponibilidadeRoutes);
-app.use('api/carteirinhas', carteirinhaRoutes);
+app.use('/api/carteirinhas', carteirinhaRoutes);
 app.use('/api/notifications', notificacaoRoutes);
 
 // Se o token for válido, o usuário poderá acessar essa rota caso contrário fica na tela de login

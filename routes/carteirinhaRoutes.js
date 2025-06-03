@@ -49,4 +49,25 @@ router.get(
   carteirinhaCtrl.listarCarteirinhas
 );
 
+router.patch('/liberar/:estudanteId', async (req, res) => {
+  try {
+    const { estudanteId } = req.params;
+    const carteirinha = await Carteirinha.findOne({ estudante: estudanteId });
+
+    if (!carteirinha || carteirinha.status !== 'aprovada') {
+      return res.status(400).json({ erro: 'Carteirinha não encontrada ou não aprovada.' });
+    }
+
+    carteirinha.liberadoPosValidacao = true;
+    await carteirinha.save();
+
+    return res.status(200).json({ sucesso: true });
+  } catch (err) {
+    return res.status(500).json({ erro: err.message });
+  }
+});
+
+router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
+
+
 export default router;

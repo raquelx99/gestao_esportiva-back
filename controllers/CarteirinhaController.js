@@ -114,13 +114,25 @@ export async function renovarCarteirinha(req, res, next) {
 export async function aprovarCarteirinha(req, res, next) {
   try {
     const { id } = req.params;
+    // 1) Busca a carteirinha pelo ID
     const carteirinha = await Carteirinha.findById(id);
     if (!carteirinha) {
       return res.status(404).json({ erro: 'Carteirinha não encontrada' });
     }
+
     carteirinha.status = 'aprovado';
     await carteirinha.save();
-    res.json(carteirinha);
+
+    const estudanteId = carteirinha.estudante;
+    const estudante = await Estudante.findById(estudanteId);
+    if (!estudante) {
+      return res.status(404).json({ erro: 'Estudante não encontrado para esta carteirinha' });
+    }
+
+    estudante.semestreInicio = new Date();
+    await estudante.save();
+
+    return res.json(carteirinha);
   } catch (err) {
     next(err);
   }
@@ -149,6 +161,25 @@ export async function listarCarteirinhas(req, res, next) {
     const all = await Carteirinha.find()
       .populate('estudante', 'matricula nome');
     res.json(all);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET /api/carteirinha/estudante/:estudanteId
+export async function getByEstudanteId(req, res, next) {
+  try {
+    const { estudanteId } = req.params;
+
+    const carteirinha = await Carteirinha
+      .findOne({ estudante: estudanteId })
+      .populate('estudante', 'matricula nome curso centro telefone telefoneUrgencia semestreInicio');
+
+    if (!carteirinha) {
+      return res.status(404).json({ erro: 'Carteirinha não encontrada para este estudante.' });
+    }
+
+    res.json(carteirinha);
   } catch (err) {
     next(err);
   }
