@@ -12,6 +12,7 @@ import localRoutes        from './routes/localRoutes.js';
 import disponibilidadeRoutes from './routes/disponibilidadeRoutes.js';
 import carteirinhaRoutes from './routes/carteirinhaRoutes.js'
 import notificacaoRoutes from './routes/notificacoesRoutes.js'
+import horarioRoutes from './routes/notificacoesRoutes.js'
 
 dotenv.config();
 
