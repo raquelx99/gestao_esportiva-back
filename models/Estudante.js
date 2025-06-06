@@ -7,7 +7,6 @@ const estudanteSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  matricula:        { type: String, required: true, unique: true },
   nome:             { type: String, required: true },
   curso:            { type: String, required: true },
   centro:           { type: String, required: true },

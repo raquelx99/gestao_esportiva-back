@@ -4,6 +4,7 @@ import { hashPassword } from '../utils/hash.js';
 const usuarioSchema = new mongoose.Schema({
   nome: { type: String, required: true },
   senha: { type: String, required: true },
+  matricula: { type: String, required: true, unique: true },
   role: { type: String, required: true, enum: ['estudante','funcionario'] }
 });
 

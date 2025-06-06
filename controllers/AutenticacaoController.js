@@ -42,6 +42,7 @@ export const login = async (req, res) => {
       usuario: {
         id: usuario._id,
         nome: usuario.nome,
+        matricula: estudante.matricula,
         role: usuario.role
       },
       perfil: {
@@ -49,7 +50,6 @@ export const login = async (req, res) => {
         dados: usuario.role === 'estudante'
           ? {
               _id: estudante._id,
-              matricula: estudante.matricula,
               curso: estudante.curso,
               centro: estudante.centro,
               telefone: estudante.telefone,
