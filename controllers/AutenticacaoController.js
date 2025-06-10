@@ -9,26 +9,31 @@ export const login = async (req, res) => {
   const { matricula, senha } = req.body;
 
   try {
-    const estudante = await Estudante.findOne({ matricula }).populate('user');
+    const usuarioExistente = await Usuario.findOne({ matricula });
 
-    const funcionario = await Funcionario.findOne({ matricula }).populate('user');
-
-    const usuarioRelacionado = estudante || funcionario;
-    if (!usuarioRelacionado) {
+    if (!usuarioExistente) {
       return res.status(404).json({ mensagem: 'Usuário não encontrado' });
     }
 
-    const usuario = usuarioRelacionado.user;
+    const userId = usuarioExistente._id;
 
-    const senhaValida = await isPasswordValid(senha, usuario.senha);
+    const estudante = await Estudante.findOne({ user: userId });
+    const funcionario = await Funcionario.findOne({ user: userId });
+
+    const usuarioRelacionado = estudante || funcionario;
+    if (!usuarioRelacionado) {
+      return res.status(404).json({ mensagem: 'Perfil de usuário não encontrado' });
+    }
+
+    const senhaValida = await isPasswordValid(senha, usuarioExistente.senha);
     if (!senhaValida) {
       return res.status(401).json({ erro: 'Senha inválida.' });
     }
 
-    const token = gerarToken(usuario);
+    const token = gerarToken(usuarioExistente);
 
     let carteirinha = null;
-    if (usuario.role === 'estudante' && estudante) {
+    if (usuarioExistente.role === 'estudante' && estudante) {
       carteirinha = await Carteirinha
         .findOne({ estudante: estudante._id })
         .populate(
@@ -40,14 +45,14 @@ export const login = async (req, res) => {
     return res.status(200).json({
       token,
       usuario: {
-        id: usuario._id,
-        nome: usuario.nome,
-        matricula: estudante.matricula,
-        role: usuario.role
+        id: usuarioExistente._id,
+        nome: usuarioExistente.nome,
+        matricula: usuarioExistente.matricula,
+        role: usuarioExistente.role
       },
       perfil: {
-        tipo: usuario.role,
-        dados: usuario.role === 'estudante'
+        tipo: usuarioExistente.role,
+        dados: usuarioExistente.role === 'estudante'
           ? {
               _id: estudante._id,
               curso: estudante.curso,
@@ -74,4 +79,3 @@ export const login = async (req, res) => {
     return res.status(500).json({ erro: 'Erro ao realizar login.' });
   }
 };
-

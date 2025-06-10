@@ -45,6 +45,7 @@ export const criarUsuario = async (req, res) => {
         centro,
         telefone,
         telefoneUrgencia,
+        semestreInicio: new Date()
       });
       await novoEstudante.save();
       perfilCriado = { tipo: 'estudante', dados: novoEstudante };

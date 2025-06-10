@@ -3,7 +3,7 @@ import { Local } from "../models/Local.js";
 // GET /api/spaces
 export async function listarLocais(req, res) {
   const locais = await Local.find();
-  res.json(spaces);
+  res.json(locais);
 }
 
 // POST /api/spaces
