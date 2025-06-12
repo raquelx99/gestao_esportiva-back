@@ -69,5 +69,6 @@ router.patch('/liberar/:estudanteId', async (req, res) => {
 
 router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
 
+router.get('/pendentes', carteirinhaCtrl.getCarteirinhasPendentes);
 
 export default router;

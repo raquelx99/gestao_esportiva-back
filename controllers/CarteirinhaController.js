@@ -184,3 +184,14 @@ export async function getByEstudanteId(req, res, next) {
     next(err);
   }
 }
+
+export async function getCarteirinhasPendentes(req, res, next) {
+  try {
+    const pendentes = await Carteirinha.find({ status: 'pendente' })
+      .populate('estudante', 'matricula nome curso centro telefone telefoneUrgencia semestreInicio');
+    
+    res.json(pendentes);
+  } catch (err) {
+    next(err);
+  }
+}
