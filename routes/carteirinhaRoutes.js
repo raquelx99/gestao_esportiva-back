@@ -73,6 +73,6 @@ router.patch('/liberar/:estudanteId', async (req, res) => {
 
 router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
 
-router.get('/api/carteirinha/:id/foto', carteirinhaCtrl.getFotoCarteirinha);
+router.get('/:id/foto', carteirinhaCtrl.getFotoCarteirinha);
 
 export default router;

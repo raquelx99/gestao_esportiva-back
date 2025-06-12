@@ -85,7 +85,7 @@ export async function getCarteirinha(req, res, next) {
       delete obj.foto.contentType;
     }
     obj.temFoto = hasFoto;
-    obj.urlFoto = hasFoto ? `/api/carteirinha/${carteirinha._id}/foto` : null;
+    obj.urlFoto = hasFoto ? `/api/carteirinhas/${carteirinha._id}/foto` : null;
 
     return res.json(obj);
   } catch (err) {
@@ -124,7 +124,7 @@ export async function getByMatricula(req, res, next) {
       delete obj.foto.contentType;
     }
     obj.temFoto = hasFoto;
-    obj.urlFoto = hasFoto ? `/api/carteirinha/${carteirinha._id}/foto` : null;
+    obj.urlFoto = hasFoto ? `/api/carteirinhas/${carteirinha._id}/foto` : null;
 
     return res.json(obj);
   } catch (err) {
@@ -232,7 +232,7 @@ export async function listarCarteirinhas(req, res, next) {
         delete obj.foto.contentType;
       }
       obj.temFoto = hasFoto;
-      obj.urlFoto = hasFoto ? `/api/carteirinha/${doc._id}/foto` : null;
+      obj.urlFoto = hasFoto ? `/api/carteirinhas/${doc._id}/foto` : null;
       return obj;
     });
 
@@ -262,7 +262,7 @@ export async function getByEstudanteId(req, res, next) {
       delete obj.foto.contentType;
     }
     obj.temFoto = hasFoto;
-    obj.urlFoto = hasFoto ? `/api/carteirinha/${carteirinha._id}/foto` : null;
+    obj.urlFoto = hasFoto ? `/api/carteirinhas/${carteirinha._id}/foto` : null;
 
     res.json(obj);
   } catch (err) {
@@ -291,7 +291,7 @@ export async function getCarteirinhasPendentes(req, res, next) {
         delete obj.foto.contentType;
       }
       obj.temFoto = hasFoto;
-      obj.urlFoto = hasFoto ? `/api/carteirinha/${doc._id}/foto` : null;
+      obj.urlFoto = hasFoto ? `/api/carteirinhas/${doc._id}/foto` : null;
       return obj;
     });
 
