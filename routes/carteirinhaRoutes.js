@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as carteirinhaCtrl from '../controllers/CarteirinhaController.js';
 import { requireRole } from '../middlewares/checarRole.js';
+import upload from '../middlewares/upload.js';
 
 const router = Router();
 
@@ -8,7 +9,8 @@ router.get('/pendentes', carteirinhaCtrl.getCarteirinhasPendentes);
 
 // Criação de uma nova carteirinha (após cadastro de estudante)
 router.post(
-  '/', 
+  '/',
+  upload.single('foto'), 
   carteirinhaCtrl.criarCarteirinha
 );
 
@@ -26,28 +28,28 @@ router.get(
 
 // Renovação (aluno que é dono pode renovar)
 router.put(
-  '/:id/renovar',
+  '/renovar/:id',
   carteirinhaCtrl.renovarCarteirinha
 );
 
 // Aprovação (apenas funcionários)
 router.put(
-  '/:id/approve',
-  requireRole('staff'),
+  '/aprovar/:id',
+  requireRole('funcionario'),
   carteirinhaCtrl.aprovarCarteirinha
 );
 
 // Rejeição (apenas funcionários)
 router.put(
-  '/:id/reject',
-  requireRole('staff'),
+  '/rejeitar/:id',
+  requireRole('funcionario'),
   carteirinhaCtrl.rejeitarCarteirinha
 );
 
 // Listagem geral (admin ou staff)
 router.get(
   '/',
-  requireRole('staff'),
+  requireRole('funcionario'),
   carteirinhaCtrl.listarCarteirinhas
 );
 
@@ -71,6 +73,6 @@ router.patch('/liberar/:estudanteId', async (req, res) => {
 
 router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
 
-
+router.get('/api/carteirinha/:id/foto', carteirinhaCtrl.getFotoCarteirinha);
 
 export default router;

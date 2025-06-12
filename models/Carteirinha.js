@@ -34,6 +34,16 @@ const carteirinhaSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  foto: {
+  data: {
+    type: Buffer,
+    required: true
+  },
+  contentType: {
+    type: String,
+    required: true
+  }
+}
 }, { timestamps: true });
 
 export const Carteirinha = mongoose.model('Carteirinha', carteirinhaSchema);
