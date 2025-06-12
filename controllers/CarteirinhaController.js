@@ -28,7 +28,7 @@ export async function criarCarteirinha(req, res, next) {
       validade,
       espacos,
       status: 'pendente',
-      historicoRenovacoes: []
+      historicoRenovacoes: [],
     });
 
     res.status(201).json(nova);
@@ -47,7 +47,16 @@ export async function getCarteirinha(req, res, next) {
     if (!carteirinha) {
       return res.status(404).json({ erro: 'Carteirinha não encontrada' });
     }
-    res.json(carteirinha);
+
+    const agora = dayjs();
+    const validade = dayjs(carteirinha.validade);
+    if (validade.isBefore(agora) && carteirinha.status !== 'expirado') {
+      carteirinha.status = 'expirado';
+      carteirinha.liberadoPosValidacao = false;
+      await carteirinha.save();
+    }
+
+    return res.json(carteirinha);
   } catch (err) {
     next(err);
   }
@@ -57,19 +66,26 @@ export async function getCarteirinha(req, res, next) {
 export async function getByMatricula(req, res, next) {
   try {
     const { matricula } = req.params;
-    // Primeiro acha o Estudante
     const estudante = await Estudante.findOne({ matricula });
     if (!estudante) {
       return res.status(404).json({ erro: 'Estudante não encontrado' });
     }
-    // Depois a Carteirinha
-    const carteirinha = await Carteirinha
+    let carteirinha = await Carteirinha
       .findOne({ estudante: estudante._id })
       .populate('estudante', 'matricula nome curso centro telefone telefoneUrgencia semestreInicio');
+
     if (!carteirinha) {
       return res.status(404).json({ erro: 'Carteirinha não encontrada' });
     }
-    res.json(carteirinha);
+
+    const agora = dayjs();
+    const validade = dayjs(carteirinha.validade);
+    if (validade.isBefore(agora) && carteirinha.status !== 'expirado') {
+      carteirinha.status = 'expirado';
+      await carteirinha.save();
+    }
+
+    return res.json(carteirinha);
   } catch (err) {
     next(err);
   }
@@ -132,6 +148,13 @@ export async function aprovarCarteirinha(req, res, next) {
     estudante.semestreInicio = new Date();
     await estudante.save();
 
+    const agora = dayjs();
+    const validade = dayjs(carteirinha.validade);
+    if (validade.isBefore(agora) && carteirinha.status !== 'expirado') {
+      carteirinha.status = 'expirado';
+      await carteirinha.save();
+    }
+
     return res.json(carteirinha);
   } catch (err) {
     next(err);
@@ -188,8 +211,15 @@ export async function getByEstudanteId(req, res, next) {
 export async function getCarteirinhasPendentes(req, res, next) {
   try {
     const pendentes = await Carteirinha.find({ status: 'pendente' })
-      .populate('estudante', 'matricula nome curso centro telefone telefoneUrgencia semestreInicio');
-    
+      .populate({
+        path: 'estudante',
+        select: 'nome matricula curso centro telefone telefoneUrgencia semestreInicio user',
+        populate: {
+          path: 'user',
+          select: 'nome matricula'
+        }
+      });
+
     res.json(pendentes);
   } catch (err) {
     next(err);

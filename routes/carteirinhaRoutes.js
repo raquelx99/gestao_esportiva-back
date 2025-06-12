@@ -4,6 +4,8 @@ import { requireRole } from '../middlewares/checarRole.js';
 
 const router = Router();
 
+router.get('/pendentes', carteirinhaCtrl.getCarteirinhasPendentes);
+
 // Criação de uma nova carteirinha (após cadastro de estudante)
 router.post(
   '/', 
@@ -69,6 +71,6 @@ router.patch('/liberar/:estudanteId', async (req, res) => {
 
 router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
 
-router.get('/pendentes', carteirinhaCtrl.getCarteirinhasPendentes);
+
 
 export default router;

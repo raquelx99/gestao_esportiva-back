@@ -29,7 +29,11 @@ const carteirinhaSchema = new mongoose.Schema({
     default: 'pendente',
     required: true
   },
-  liberadoPosValidacao: { type: Boolean, default: false }
+  liberadoPosValidacao: { type: Boolean, default: false },
+  dataRequisicao: {
+    type: Date,
+    default: Date.now
+  },
 }, { timestamps: true });
 
 export const Carteirinha = mongoose.model('Carteirinha', carteirinhaSchema);
