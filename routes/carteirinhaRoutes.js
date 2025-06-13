@@ -36,43 +36,25 @@ router.put(
 // Aprovação (apenas funcionários)
 router.put(
   '/aprovar/:id',
-  autenticarToken,
-  requireRole('funcionario'),
   carteirinhaCtrl.aprovarCarteirinha
 );
 
 // Rejeição (apenas funcionários)
 router.put(
   '/rejeitar/:id',
-  autenticarToken,
-  requireRole('funcionario'),
   carteirinhaCtrl.rejeitarCarteirinha
 );
 
 // Listagem geral (admin ou staff)
 router.get(
   '/',
-  requireRole('funcionario'),
   carteirinhaCtrl.listarCarteirinhas
 );
 
-router.patch('/liberar/:estudanteId', async (req, res) => {
-  try {
-    const { estudanteId } = req.params;
-    const carteirinha = await Carteirinha.findOne({ estudante: estudanteId });
-
-    if (!carteirinha || carteirinha.status !== 'aprovada') {
-      return res.status(400).json({ erro: 'Carteirinha não encontrada ou não aprovada.' });
-    }
-
-    carteirinha.liberadoPosValidacao = true;
-    await carteirinha.save();
-
-    return res.status(200).json({ sucesso: true });
-  } catch (err) {
-    return res.status(500).json({ erro: err.message });
-  }
-});
+router.patch(
+  '/liberar/:estudanteId',
+  carteirinhaCtrl.liberarCarteirinha
+);
 
 router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
 router.get('/:id/foto', carteirinhaCtrl.getFotoCarteirinha);

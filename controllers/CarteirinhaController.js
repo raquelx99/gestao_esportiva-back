@@ -1,7 +1,9 @@
+import mongoose from 'mongoose';
 import dayjs from 'dayjs';
 import { Carteirinha } from '../models/Carteirinha.js';
 import { Estudante }  from '../models/Estudante.js';
 import sharp from 'sharp';
+import { Usuario } from '../models/Usuario.js';
 
 // POST /api/carteirinha
 export async function criarCarteirinha(req, res, next) {
@@ -97,16 +99,30 @@ export async function getCarteirinha(req, res, next) {
 export async function getByMatricula(req, res, next) {
   try {
     const { matricula } = req.params;
-    const estudante = await Estudante.findOne({ matricula });
-    if (!estudante) {
-      return res.status(404).json({ erro: 'Estudante não encontrado' });
+
+    const usuario = await Usuario.findOne({ matricula });
+    if (!usuario) {
+      return res.status(404).json({ erro: 'Usuário não encontrado com essa matrícula' });
     }
+
+    const estudante = await Estudante.findOne({ user: usuario._id });
+    if (!estudante) {
+      return res.status(404).json({ erro: 'Estudante não encontrado para este usuário' });
+    }
+
     let carteirinha = await Carteirinha
       .findOne({ estudante: estudante._id })
-      .populate('estudante', 'matricula nome curso centro telefone telefoneUrgencia semestreInicio');
+      .populate({
+        path: 'estudante',
+        select: 'curso centro telefone telefoneUrgencia semestreInicio user',
+        populate: {
+          path: 'user',
+          select: 'nome matricula'
+        }
+      });
 
     if (!carteirinha) {
-      return res.status(404).json({ erro: 'Carteirinha não encontrada' });
+      return res.status(404).json({ erro: 'Carteirinha não encontrada para este estudante' });
     }
 
     const agora = dayjs();
@@ -180,7 +196,7 @@ export async function aprovarCarteirinha(req, res, next) {
     carteirinha.status = 'aprovado';
     await carteirinha.save();
 
-    const estudanteId = carteirinha.estudante.id;
+    const estudanteId = carteirinha.estudante._id;
     const estudante = await Estudante.findById(estudanteId);
     if (!estudante) {
       return res.status(404).json({ erro: 'Estudante não encontrado para esta carteirinha' });
@@ -204,17 +220,48 @@ export async function aprovarCarteirinha(req, res, next) {
 
 // PUT /api/carteirinha/:id/reject
 export async function rejeitarCarteirinha(req, res, next) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { id } = req.params;
-    const carteirinha = await Carteirinha.findById(id);
+
+    const carteirinha = await Carteirinha.findById(id).session(session);
     if (!carteirinha) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ erro: 'Carteirinha não encontrada' });
     }
-    carteirinha.status = 'rejeitado';
-    await carteirinha.save();
-    res.json(carteirinha);
+
+    const estudanteId = carteirinha.estudante;
+    const estudante = await Estudante.findById(estudanteId).session(session);
+    if (!estudante) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ erro: 'Estudante não encontrado para esta carteirinha' });
+    }
+
+    const usuarioId = estudante.user;
+    const usuario = await Usuario.findById(usuarioId).session(session);
+    if (!usuario) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ erro: 'Usuário não encontrado para este estudante' });
+    }
+
+    await Carteirinha.deleteOne({ _id: id }).session(session);
+    await Estudante.deleteOne({ _id: estudanteId }).session(session);
+    await Usuario.deleteOne({ _id: usuarioId }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+    return res.status(200).json({
+      sucesso: true,
+      mensagem: 'Carteirinha rejeitada e usuário/estudante removidos'
+    });
   } catch (err) {
-    next(err);
+    await session.abortTransaction();
+    session.endSession();
+    return next(err);
   }
 }
 
@@ -347,4 +394,25 @@ export async function getCarteirinhasPorStatus(req, res, next) {
   } catch (err) {
     next(err);
   }
+
+}
+
+export async function liberarCarteirinha(req, res, next) {
+  try {
+    const { estudanteId } = req.params;
+
+    const carteirinha = await Carteirinha.findOne({ estudante: estudanteId });
+
+    if (!carteirinha || carteirinha.status !== 'aprovado') {
+      return res.status(400).json({ erro: 'Carteirinha não encontrada ou não aprovada.' });
+    }
+
+    carteirinha.liberadoPosValidacao = true;
+    await carteirinha.save();
+
+    return res.status(200).json({ sucesso: true });
+  } catch (err) {
+    return res.status(500).json({ erro: err.message });
+  }
+  
 }
