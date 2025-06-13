@@ -19,7 +19,7 @@ export async function getDisponibilidade(req, res, next) {
     }
     const disponibilidades = await Disponibilidade.find({
       local: localId,
-      diaSemana: diaNum
+      diaDaSemana: diaNum
     });
     return res.json(disponibilidades);
   } catch (err) {
