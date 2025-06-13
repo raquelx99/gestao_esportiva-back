@@ -16,3 +16,14 @@ export async function updateEstudante(req, res) {
   if (!est) return res.status(404).json({ message: 'Estudante não encontrado' });
   res.json(est);
 }
+
+// GET /api/estudantes/matricula/:matricula
+export async function getEstudanteByMatricula(req, res) {
+  const { matricula } = req.params;
+  const est = await Estudante.findOne().populate({
+    path: 'user',
+    match: { matricula }
+  });
+  if (!est || !est.user) return res.status(404).json({ message: 'Estudante não encontrado' });
+  res.json(est);
+}

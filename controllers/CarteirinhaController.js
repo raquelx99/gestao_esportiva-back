@@ -150,36 +150,86 @@ export async function getByMatricula(req, res, next) {
 
 // PUT /api/carteirinha/:id/renovar
 export async function renovarCarteirinha(req, res, next) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { id } = req.params;
-    const { periodoEmSemestres = 1 } = req.body; 
+    const {
+      nome,
+      matricula,
+      curso,
+      centro,
+      telefone,
+      telefoneUrgencia,
+      espacos = [],
+      periodoEmSemestres = 1
+    } = req.body;
 
-    const carteirinha = await Carteirinha.findById(id);
+    const carteirinha = await Carteirinha.findById(id).session(session);
     if (!carteirinha) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ erro: 'Carteirinha não encontrada' });
     }
 
-    if (carteirinha.estudante.toString() !== req.user.id) {
-      return res.status(403).json({ erro: 'Sem permissão para renovar' });
+    const estudante = await Estudante.findById(carteirinha.estudante).session(session);
+    if (!estudante) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ erro: 'Estudante não encontrado' });
     }
 
-    const meses = 6 * periodoEmSemestres;
-    const atual = dayjs(carteirinha.validade);
-    const novaValidade = atual.isAfter(dayjs())
-      ? atual.add(meses, 'month')
-      : dayjs().add(meses, 'month');
+    const usuario = await Usuario.findById(estudante.user).session(session);
+    if (!usuario) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ erro: 'Usuário não encontrado' });
+    }
 
-    carteirinha.validade = novaValidade.toDate();
+    usuario.nome = nome || usuario.nome;
+    usuario.matricula = matricula || usuario.matricula;
+    await usuario.save({ session });
+
+    estudante.curso = curso || estudante.curso;
+    estudante.centro = centro || estudante.centro;
+    estudante.telefone = telefone || estudante.telefone;
+    estudante.telefoneUrgencia = telefoneUrgencia || estudante.telefoneUrgencia;
+    estudante.semestreInicio = new Date();
+    await estudante.save({ session });
+
+    if (!req.file) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ erro: 'Nova imagem da carteirinha é obrigatória.' });
+    }
+
+    const novaFoto = await sharp(req.file.buffer)
+      .resize(300, 400)
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    const novaValidade = dayjs().add(6 * periodoEmSemestres, 'month').toDate();
+
+    carteirinha.validade = novaValidade;
+    carteirinha.espacos = espacos;
+    carteirinha.foto = {
+      data: novaFoto,
+      contentType: 'image/jpeg'
+    };
     carteirinha.status = 'pendente';
-    carteirinha.historicoRenovacoes.push({
-      dataRenovacao: new Date(),
-      periodoEmSemestres
-    });
+    carteirinha.liberadoPosValidacao = false;
+    carteirinha.dataRequisicao = new Date();
+    await carteirinha.save({ session });
 
-    await carteirinha.save();
-    res.json(carteirinha);
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({ mensagem: 'Carteirinha renovada com sucesso!' });
   } catch (err) {
-    next(err);
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Erro ao renovar carteirinha:', err);
+    return next(err);
   }
 }
 
@@ -300,6 +350,14 @@ export async function getByEstudanteId(req, res, next) {
 
     if (!carteirinha) {
       return res.status(404).json({ erro: 'Carteirinha não encontrada para este estudante.' });
+    }
+
+    const agora = dayjs();
+    const validade = dayjs(carteirinha.validade);
+    if (validade.isBefore(agora) && carteirinha.status !== 'expirado') {
+      carteirinha.status = 'expirado';
+      carteirinha.liberadoPosValidacao = false;
+      await carteirinha.save();
     }
 
     const obj = carteirinha.toObject({ getters: true, versionKey: false });

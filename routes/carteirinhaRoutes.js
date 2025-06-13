@@ -15,6 +15,14 @@ router.post(
   upload.single('foto'), 
   carteirinhaCtrl.criarCarteirinha
 );
+
+// Renovação de carteirinha (apenas para o dono)
+router.put(
+  '/carteirinhas/:id/renovar', 
+  upload.single('foto'), 
+  carteirinhaCtrl.renovarCarteirinha
+);
+
 // Consulta por matrícula
 router.get(
   '/matricula/:matricula',
