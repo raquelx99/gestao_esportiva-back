@@ -1,4 +1,5 @@
 import { Estudante } from '../models/Estudante.js';
+import { Usuario } from '../models/Usuario.js';
 
 // GET /api/estudantes/:userId
 export async function getEstudante(req, res) {
@@ -17,13 +18,23 @@ export async function updateEstudante(req, res) {
   res.json(est);
 }
 
-// GET /api/estudantes/matricula/:matricula
 export async function getEstudanteByMatricula(req, res) {
-  const { matricula } = req.params;
-  const est = await Estudante.findOne().populate({
-    path: 'user',
-    match: { matricula }
-  });
-  if (!est || !est.user) return res.status(404).json({ message: 'Estudante não encontrado' });
-  res.json(est);
+  try {
+    const { matricula } = req.params;
+
+    const usuario = await Usuario.findOne({ matricula });
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuário não encontrado com essa matrícula' });
+    }
+
+    const estudante = await Estudante.findOne({ user: usuario._id });
+    if (!estudante) {
+      return res.status(404).json({ message: 'Estudante não encontrado para este usuário' });
+    }
+
+    res.json(estudante);
+  } catch (error) {
+    console.error('Erro ao buscar estudante por matrícula:', error);
+    res.status(500).json({ message: 'Erro interno no servidor' });
+  }
 }
