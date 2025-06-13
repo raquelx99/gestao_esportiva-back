@@ -38,6 +38,7 @@ router.get(
 // Renovação (aluno que é dono pode renovar)
 router.put(
   '/renovar/:id',
+  upload.single('foto'),
   carteirinhaCtrl.renovarCarteirinha
 );
 
