@@ -317,3 +317,34 @@ export async function getFotoCarteirinha(req, res, next) {
     next(err);
   }
 }
+
+export async function getCarteirinhasPorStatus(req, res, next) {
+  try {
+    const { status } = req.params;
+    const carteirinhas = await Carteirinha.find({ status })
+      .populate({
+        path: 'estudante',
+        select: 'nome matricula curso centro telefone telefoneUrgencia semestreInicio user',
+        populate: {
+          path: 'user',
+          select: 'nome matricula'
+        }
+      });
+
+    const resultado = carteirinhas.map(doc => {
+      const obj = doc.toObject({ getters: true, versionKey: false });
+      const hasFoto = !!doc.foto?.data;
+      if (obj.foto) {
+        delete obj.foto.data;
+        delete obj.foto.contentType;
+      }
+      obj.temFoto = hasFoto;
+      obj.urlFoto = hasFoto ? `/api/carteirinhas/${doc._id}/foto` : null;
+      return obj;
+    });
+
+    res.json(resultado);
+  } catch (err) {
+    next(err);
+  }
+}

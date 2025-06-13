@@ -6,7 +6,7 @@ export async function listarLocais(req, res) {
   res.json(locais);
 }
 
-// POST /api/spaces
+// POST /api/locais
 export async function criarLocal(req, res) {
   const local = await Local.create(req.body);
   res.status(201).json(local);

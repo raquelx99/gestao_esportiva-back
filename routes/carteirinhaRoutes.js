@@ -2,6 +2,8 @@ import { Router } from 'express';
 import * as carteirinhaCtrl from '../controllers/CarteirinhaController.js';
 import { requireRole } from '../middlewares/checarRole.js';
 import upload from '../middlewares/upload.js';
+import { Carteirinha } from '../models/Carteirinha.js';
+import autenticarToken from '../middlewares/autenticarToken.js';
 
 const router = Router();
 
@@ -13,17 +15,16 @@ router.post(
   upload.single('foto'), 
   carteirinhaCtrl.criarCarteirinha
 );
+// Consulta por matrícula
+router.get(
+  '/matricula/:matricula',
+  carteirinhaCtrl.getByMatricula
+);
 
 // Consulta por ID
 router.get(
   '/:id',
   carteirinhaCtrl.getCarteirinha
-);
-
-// Consulta por matrícula
-router.get(
-  '/matricula/:matricula',
-  carteirinhaCtrl.getByMatricula
 );
 
 // Renovação (aluno que é dono pode renovar)
@@ -35,6 +36,7 @@ router.put(
 // Aprovação (apenas funcionários)
 router.put(
   '/aprovar/:id',
+  autenticarToken,
   requireRole('funcionario'),
   carteirinhaCtrl.aprovarCarteirinha
 );
@@ -42,6 +44,7 @@ router.put(
 // Rejeição (apenas funcionários)
 router.put(
   '/rejeitar/:id',
+  autenticarToken,
   requireRole('funcionario'),
   carteirinhaCtrl.rejeitarCarteirinha
 );
@@ -72,7 +75,7 @@ router.patch('/liberar/:estudanteId', async (req, res) => {
 });
 
 router.get('/estudante/:estudanteId', carteirinhaCtrl.getByEstudanteId);
-
 router.get('/:id/foto', carteirinhaCtrl.getFotoCarteirinha);
+router.get('/status/:status', carteirinhaCtrl.getCarteirinhasPorStatus);
 
 export default router;

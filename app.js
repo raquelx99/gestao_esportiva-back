@@ -17,7 +17,12 @@ import horarioRoutes from './routes/notificacoesRoutes.js'
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:4200' }));
+app.use(cors({
+  origin: 'http://localhost:4200',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Conexão com o MongoDB
